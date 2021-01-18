@@ -1,8 +1,8 @@
 const Student = require('../models/student')
 
 exports.getAllStudents = (req, res, next) => {
-    Student.fetchAll()
-        .then(([results]) => {
+    Student.findAll()
+        .then(results => {
             res.render('students', {
                 students: results
             })
@@ -18,10 +18,10 @@ exports.getAddStudent = (req, res, next) => {
 
 exports.getEditStudent = (req, res, next) => {
     const studentId = req.params.studentId
-    Student.findById(studentId)
-        .then(([result]) => {
+    Student.findByPk(studentId)
+        .then(result => {
             res.render('editStudent', {
-                student: result[0]
+                student: result
             })
         })
         .catch(err => {
@@ -34,9 +34,13 @@ exports.postAddStudent = (req, res, next) => {
     const name = req.body.name
     const email = req.body.email
 
-    const student = new Student(null, nisn, name, email)
-    student.save()
-        .then(() => {
+    Student.create({
+        nisn: nisn,
+        email: email,
+        name: name
+    })
+        .then(result => {
+            console.log('STUDENT CREATED')
             res.redirect('/')
         })
         .catch(err => {
@@ -50,9 +54,15 @@ exports.postEditStudent = (req, res, next) => {
     const name = req.body.name
     const email = req.body.email
 
-    const student = new Student(studentId, nisn, name, email)
-    student.update()
-        .then(() => {
+    Student.findByPk(studentId)
+        .then(student => {
+            student.nisn = nisn,
+            student.name = name,
+            student.email = email
+            return student.save()
+        })
+        .then(result => {
+            console.log('STUDENT UPDATED')
             res.redirect('/')
         })
         .catch(err => {
@@ -62,8 +72,12 @@ exports.postEditStudent = (req, res, next) => {
 
 exports.postDeleteStudent = (req, res, next) => {
     const studentId = req.body.studentId
-    Student.deleteById(studentId)
-        .then(() => {
+    Student.findByPk(studentId)
+        .then(product => {
+            return product.destroy()
+        })
+        .then(result => {
+            console.log('student deleted')
             res.redirect('/')
         })
         .catch(err => {
